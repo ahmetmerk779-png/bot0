@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -12,7 +13,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // --- AI AYARLARI ---
-const genAI = new GoogleGenerativeAI("BURAYA_API_KEY_GELECEK"); 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); 
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 app.use(express.static('public'));
