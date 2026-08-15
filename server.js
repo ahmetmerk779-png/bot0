@@ -5,6 +5,7 @@ const { Server } = require('socket.io');
 const mineflayer = require('mineflayer');
 const { pathfinder } = require('mineflayer-pathfinder');
 const pvp = require('mineflayer-pvp').plugin;
+const { mineflayer: prismarineViewer } = require('prismarine-viewer');
 const { SocksClient } = require('socks');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
@@ -35,8 +36,8 @@ function proxyAyristir(proxyStr) {
     host = parcalar[0];
     port = parseInt(parcalar[1]);
     if (parcalar.length >= 4) { 
-        userId = parcalar[2]; 
-        password = parcalar[3]; 
+        userId = parcalar.split(':')[2]; 
+        password = parcalar.split(':')[3]; 
     }
 
     return { host, port, type, userId, password };
@@ -73,9 +74,17 @@ function botBaslat(username, proxy) {
     bot.loadPlugin(pvp);
     bots[username] = { instance: bot };
 
-    bot.on('spawn', () => {
-        io.emit('log', `✅ [${username}] Oyuna girdi, zihin ve otonom AI aktif.`);
+    bot.once('spawn', () => {
+        io.emit('log', `✅ [${username}] Oyuna girdi, 3D Viewport ve Otonom AI aktif.`);
         
+        // 3D Web Viewer Başlat (Her bot için farklı port açabilir veya webden takip edebilirsin)
+        try {
+            prismarineViewer(bot, { port: 3001, version: '1.21.1' });
+            io.emit('log', `🌐 [${username}] 3D Görselleştirici 3001 portunda aktif.`);
+        } catch (e) {
+            io.emit('log', `⚠️ [${username}] 3D Viewer başlatılamadı: ${e.message}`);
+        }
+
         // AI Otonom Karar Döngüsü (15 saniyede bir)
         setInterval(async () => {
             if (!bot.entity) return;
@@ -122,4 +131,4 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => console.log(`Sunucu ${PORT} portunda çalışıyor.`));
+server.listen(PORT, () => console.log(`Ana Panel ${PORT} portunda çalışıyor.`));
