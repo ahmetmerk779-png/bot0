@@ -2,33 +2,32 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>AesirMC Otonom AI & 3D Paneli</title>
+    <title>Minecraft AI BOT & 3D Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body class="bg-black text-green-500 p-4 font-mono">
     <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold mb-4 border-b border-green-800 pb-2">🤖 AesirMC AI BOT & 3D VIEWPORT PANELİ</h1>
+        <h1 class="text-3xl font-bold mb-4 border-b border-green-800 pb-2">🤖 AI BOT & 3D VIEWPORT PANELİ</h1>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <!-- Sol: Kontrol Paneli ve Bot Ekleme -->
             <div class="bg-gray-900 border border-green-800 p-4 rounded flex flex-col gap-3">
                 <h2 class="text-xl font-semibold text-green-400">Bot Kontrolü</h2>
-                <input id="bot-username" placeholder="Bot Nick" class="bg-black border border-green-800 p-2 text-white rounded">
-                <input id="bot-proxy" placeholder="Proxy IP:Port (SOCKS5/4)" class="bg-black border border-green-800 p-2 text-white rounded">
+                <input id="bot-username" placeholder="Bot Nick (Örn: AlBot)" class="bg-black border border-green-800 p-2 text-white rounded">
+                <input id="bot-host" placeholder="Sunucu IP / Host (Örn: kistalsmp.mcsh.io)" class="bg-black border border-green-800 p-2 text-white rounded">
+                <input id="bot-proxy" placeholder="Proxy IP:Port (İsteğe bağlı SOCKS5/4)" class="bg-black border border-green-800 p-2 text-white rounded">
                 <button onclick="botEkle()" class="bg-green-700 hover:bg-green-600 text-black font-bold p-2 rounded transition">BOTU BAŞLAT</button>
                 
                 <div class="flex gap-2 mt-4">
-                    <input id="global-komut" placeholder="Tüm botlara komut yazdır..." class="bg-black border border-green-800 p-2 w-full text-white rounded">
+                    <input id="global-komut" placeholder="Tüm botlara chat komutu yazdır..." class="bg-black border border-green-800 p-2 w-full text-white rounded">
                     <button onclick="komutGonder()" class="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 rounded transition">GÖNDER</button>
                 </div>
             </div>
 
-            <!-- Sağ: 3D Viewport Ekranı Bilgisi -->
             <div class="bg-gray-900 border border-green-800 p-4 rounded flex flex-col justify-between">
                 <div>
                     <h2 class="text-xl font-semibold text-green-400 mb-2">3D Canlı Görselleştirici</h2>
-                    <p class="text-sm text-gray-400">Botların oyun içindeki anlık kafa ve hareket açısını izlemek için tarayıcınızdan botun 3D portuna bağlanabilirsiniz.</p>
+                    <p class="text-sm text-gray-400">Botun oyun içindeki anlık durumunu izlemek için 3D portunu açabilirsiniz.</p>
                 </div>
                 <a href="http://localhost:3001" target="_blank" class="bg-purple-700 hover:bg-purple-600 text-white text-center font-bold p-3 rounded transition mt-4 block">
                     🌐 3D VIEWPORT AÇ (Port 3001)
@@ -36,7 +35,6 @@
             </div>
         </div>
 
-        <!-- Terminal Log Ekranı -->
         <div class="bg-gray-900 border border-green-800 p-4 rounded">
             <h2 class="text-xl font-semibold text-green-400 mb-2">Canlı Log Terminali</h2>
             <div id="terminal-ekran" class="h-64 bg-black p-4 rounded overflow-y-auto border border-green-900 text-sm"></div>
@@ -52,8 +50,9 @@
         });
         function botEkle() {
             const username = document.getElementById('bot-username').value;
+            const host = document.getElementById('bot-host').value;
             const proxy = document.getElementById('bot-proxy').value;
-            if(username) socket.emit('yeniBotEkle', { username, proxy });
+            if(username) socket.emit('yeniBotEkle', { username, host, proxy });
         }
         function komutGonder() {
             const komut = document.getElementById('global-komut').value;
