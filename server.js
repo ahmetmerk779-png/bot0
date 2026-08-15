@@ -22,7 +22,6 @@ const PORT = process.env.PORT || 3000;
 
 const bots = {};
 
-// Gelişmiş Proxy Ayrıştırma (Auth ve SOCKS4/5 Desteği)
 function proxyAyristir(proxyStr) {
     if (!proxyStr || !proxyStr.includes(':')) return null;
     let temizStr = proxyStr.trim();
@@ -36,19 +35,22 @@ function proxyAyristir(proxyStr) {
     host = parcalar[0];
     port = parseInt(parcalar[1]);
     if (parcalar.length >= 4) { 
-        userId = parcalar.split(':')[2]; 
-        password = parcalar.split(':')[3]; 
+        userId = parcalar[2]; 
+        password = parcalar[3]; 
     }
 
     return { host, port, type, userId, password };
 }
 
-function botBaslat(username, proxy) {
+function botBaslat(username, host, proxy) {
     if (bots[username]) return;
 
+    const serverHost = host && host.trim() !== '' ? host.trim() : 'oyna.aesirmc.com';
+    const serverPort = 25565;
+
     const botAyarlari = {
-        host: 'oyna.aesirmc.com',
-        port: 25565,
+        host: serverHost,
+        port: serverPort,
         username: username,
         version: '1.21.1'
     };
@@ -59,7 +61,7 @@ function botBaslat(username, proxy) {
             SocksClient.createConnection({
                 proxy: p, 
                 command: 'connect', 
-                destination: { host: 'oyna.aesirmc.com', port: 25565 }
+                destination: { host: serverHost, port: serverPort }
             }).then(info => { 
                 client.setSocket(info.socket); 
                 client.emit('connect'); 
@@ -75,9 +77,8 @@ function botBaslat(username, proxy) {
     bots[username] = { instance: bot };
 
     bot.once('spawn', () => {
-        io.emit('log', `✅ [${username}] Oyuna girdi, 3D Viewport ve Otonom AI aktif.`);
+        io.emit('log', `✅ [${username}] Oyuna girdi (${serverHost}), 3D ve AI aktif.`);
         
-        // 3D Web Viewer Başlat (Her bot için farklı port açabilir veya webden takip edebilirsin)
         try {
             prismarineViewer(bot, { port: 3001, version: '1.21.1' });
             io.emit('log', `🌐 [${username}] 3D Görselleştirici 3001 portunda aktif.`);
@@ -91,10 +92,10 @@ function botBaslat(username, proxy) {
             const yakinOyuncu = bot.nearestEntity(e => e.type === 'player' && e.position.distanceTo(bot.entity.position) < 15);
             const durum = yakinOyuncu ? `Yakınımda ${yakinOyuncu.username} var.` : "Etrafım sakin.";
 
-            const prompt = `Sen "${username}" adlı Minecraft oyuncususun. AesirMC BoxPvP sunucusundaysın. Durum: ${durum}. 
+            const prompt = `Sen "${username}" adlı Minecraft oyuncususun. Sunucu: ${serverHost}. Durum: ${durum}. 
             Aksiyonun ne olacak? Sadece şu formatta cevap ver:
             "CHAT: [mesaj]" veya "SALDIR: [oyuncu_adı]" veya "YOKSAY".
-            Agresif, oyuncu jargonlu (ez, ggs, bruh vb.) ve kısa cevaplar ver.`;
+            Agresif, oyuncu jargonlu ve kısa cevaplar ver.`;
 
             try {
                 const result = await model.generateContent(prompt);
@@ -109,7 +110,7 @@ function botBaslat(username, proxy) {
                     const targetEntity = bot.players[hedef]?.entity;
                     if(targetEntity) {
                         bot.pvp.attack(targetEntity);
-                        io.emit('log', `⚔️ [${username}] Otonom olarak ${hedef} hedefine saldırıyor!`);
+                        io.emit('log', `⚔️ [${username}] ${hedef} hedefine saldırıyor!`);
                     }
                 }
             } catch (err) {
@@ -118,12 +119,23 @@ function botBaslat(username, proxy) {
         }, 15000); 
     });
 
-    bot.on('kicked', (reason) => io.emit('log', `⚠️ [${username}] Sunucudan atıldı: ${reason}`));
+    bot.on('kicked', (reason) => {
+        let sebepMetni = reason;
+        try {
+            if (typeof reason === 'object') {
+                sebepMetni = JSON.stringify(reason);
+            }
+        } catch (e) {
+            sebepMetni = String(reason);
+        }
+        io.emit('log', `⚠️ [${username}] Sunucudan atıldı: ${sebepMetni}`);
+    });
+
     bot.on('error', (err) => io.emit('log', `❌ [${username}] Bot hatası: ${err.message}`));
 }
 
 io.on('connection', (socket) => {
-    socket.on('yeniBotEkle', (data) => botBaslat(data.username, data.proxy));
+    socket.on('yeniBotEkle', (data) => botBaslat(data.username, data.host, data.proxy));
     socket.on('terminalKomut', (komut) => {
         Object.values(bots).forEach(b => {
             if (b.instance && b.instance.chat) b.instance.chat(komut);
@@ -131,4 +143,4 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => console.log(`Ana Panel ${PORT} portunda çalışıyor.`));
+server.listen(PORT, () => console.log(`Sunucu ${PORT} portunda çalışıyor.`));
