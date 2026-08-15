@@ -11,7 +11,7 @@
     "mineflayer": "^4.20.0",
     "mineflayer-pathfinder": "^2.4.4",
     "mineflayer-pvp": "^3.0.0",
-    "minecraft-data": "^3.120.0",
+    "minecraft-data": "*",
     "prismarine-viewer": "^1.27.0",
     "socks": "^2.8.3",
     "@google/generative-ai": "^0.15.0",
