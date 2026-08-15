@@ -2,136 +2,63 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AesirMC Bot Kontrol Paneli</title>
+    <title>AesirMC Otonom AI & 3D Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/socket.io/socket.io.js"></script>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen p-4 font-sans">
-    <div class="max-w-4xl mx-auto">
-        <header class="mb-6 border-b border-gray-800 pb-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                    🛡️ AesirMC Otonom Bot Ordusu
-                </h1>
-                <p class="text-xs text-gray-400">Termux & Acode Mobil Yönetim Paneli</p>
-            </div>
-        </header>
-
-        <!-- Canlı Terminal Paneli -->
-        <div class="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-6 shadow-2xl font-mono">
-            <div class="flex justify-between items-center mb-2 border-b border-gray-800 pb-2">
-                <span class="text-xs text-green-400 font-bold flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    CANLI TERMİNAL (BOT LOGLARI)
-                </span>
-                <button onclick="terminaliTemizle()" class="text-[10px] text-gray-500 hover:text-gray-300">Temizle</button>
-            </div>
-            
-            <div id="terminal-ekran" class="h-48 overflow-y-auto bg-black/80 rounded p-3 text-xs text-green-400 space-y-1 mb-3 border border-gray-900 select-text">
-                <div class="text-gray-600">[Sistem] Terminal başlatıldı. Bağlantı bekleniyor...</div>
+<body class="bg-black text-green-500 p-4 font-mono">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-4 border-b border-green-800 pb-2">🤖 AesirMC AI BOT & 3D VIEWPORT PANELİ</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <!-- Sol: Kontrol Paneli ve Bot Ekleme -->
+            <div class="bg-gray-900 border border-green-800 p-4 rounded flex flex-col gap-3">
+                <h2 class="text-xl font-semibold text-green-400">Bot Kontrolü</h2>
+                <input id="bot-username" placeholder="Bot Nick" class="bg-black border border-green-800 p-2 text-white rounded">
+                <input id="bot-proxy" placeholder="Proxy IP:Port (SOCKS5/4)" class="bg-black border border-green-800 p-2 text-white rounded">
+                <button onclick="botEkle()" class="bg-green-700 hover:bg-green-600 text-black font-bold p-2 rounded transition">BOTU BAŞLAT</button>
+                
+                <div class="flex gap-2 mt-4">
+                    <input id="global-komut" placeholder="Tüm botlara komut yazdır..." class="bg-black border border-green-800 p-2 w-full text-white rounded">
+                    <button onclick="komutGonder()" class="bg-blue-700 hover:bg-blue-600 text-white font-bold px-4 rounded transition">GÖNDER</button>
+                </div>
             </div>
 
-            <div class="flex gap-2">
-                <span class="text-green-500 self-center text-xs">#</span>
-                <input type="text" id="terminal-input" placeholder="Komut yaz (örn: /spawn, selam)..." class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-xs text-gray-200 focus:outline-none focus:border-green-500 font-mono" onkeypress="komutKontrol(event)">
-                <button onclick="komutGonder()" class="bg-green-700 hover:bg-green-600 text-white font-bold px-4 py-2 rounded text-xs transition-colors">
-                    Gönder
-                </button>
+            <!-- Sağ: 3D Viewport Ekranı Bilgisi -->
+            <div class="bg-gray-900 border border-green-800 p-4 rounded flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-green-400 mb-2">3D Canlı Görselleştirici</h2>
+                    <p class="text-sm text-gray-400">Botların oyun içindeki anlık kafa ve hareket açısını izlemek için tarayıcınızdan botun 3D portuna bağlanabilirsiniz.</p>
+                </div>
+                <a href="http://localhost:3001" target="_blank" class="bg-purple-700 hover:bg-purple-600 text-white text-center font-bold p-3 rounded transition mt-4 block">
+                    🌐 3D VIEWPORT AÇ (Port 3001)
+                </a>
             </div>
         </div>
 
-        <!-- Bot Ekleme Kartı -->
-        <div class="bg-gray-900 rounded-lg p-4 border border-gray-800 mb-6 shadow-lg">
-            <h2 class="font-bold text-sm text-white mb-3">🤖 Bot Ordusu ve Gelişmiş Proxy Paneli</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
-                <input type="text" id="bot-username" placeholder="Bot Kullanıcı Adı" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                <input type="text" id="bot-proxy" placeholder="Proxy (IP:Port veya IP:Port:User:Pass)" class="bg-gray-950 border border-gray-700 rounded p-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                <button onclick="yeniBotKat()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded text-xs transition-colors shadow">
-                    + Yeni Botu Oyuna Sok
-                </button>
-            </div>
-            <p class="text-[10px] text-gray-400">💡 Desteklenen formatlar: <code class="text-blue-400">IP:Port</code> ya da <code class="text-blue-400">IP:Port:KullanıcıAdı:Şifre</code></p>
-        </div>
-
-        <!-- Lobi Geçiş Paneli -->
-        <div class="bg-purple-950/30 p-4 border border-purple-800 rounded-lg mb-6 shadow">
-            <h3 class="font-bold text-sm text-purple-400 mb-2">🌌 Lobi ve Sunucu Geçişi</h3>
-            <button onclick="socket.emit('lobiGecisTetikle')" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2 rounded text-xs transition-colors w-full">
-                🚀 Tüm Botları Asıl Sunucuya (Pusula ile) Geçir
-            </button>
-        </div>
-
-        <!-- Otonom Maden Paneli -->
-        <div class="bg-cyan-950/30 p-4 border border-cyan-800 rounded-lg mb-6 shadow">
-            <h3 class="font-bold text-sm text-cyan-400 mb-2">⛏️ Otonom Maden ve Kaynak Kasma</h3>
-            <div class="flex gap-2">
-                <button onclick="socket.emit('otonomMadenBaslat')" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-4 py-2 rounded text-xs w-full transition-colors">
-                    🚀 Tüm Botları Madene Gönder
-                </button>
-                <button onclick="socket.emit('otonomMadenDurdur')" class="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded text-xs transition-colors">
-                    🛑 Durdur
-                </button>
-            </div>
-        </div>
-
-        <!-- PvP Paneli -->
-        <div class="bg-red-950/30 p-4 border border-red-800 rounded-lg mb-6 shadow">
-            <h3 class="font-bold text-sm text-red-400 mb-2">⚔️ BoxPvP Savaş ve Hedef Komuta Merkezi</h3>
-            <div class="flex gap-2 mb-2">
-                <input type="text" id="pvp-hedef" placeholder="Hedef oyuncu adı..." class="w-full bg-gray-950 border border-red-900 rounded p-2 text-xs text-white focus:outline-none focus:border-red-500">
-                <button onclick="pvpBaslat()" class="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded text-xs whitespace-nowrap transition-colors">
-                    🎯 Hedefe Saldır
-                </button>
-            </div>
-            <button onclick="socket.emit('pvpDurdur')" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-1.5 px-3 rounded text-xs transition-colors w-full">
-                🛑 Tüm Savaşları Durdur (Geri Çekil)
-            </button>
+        <!-- Terminal Log Ekranı -->
+        <div class="bg-gray-900 border border-green-800 p-4 rounded">
+            <h2 class="text-xl font-semibold text-green-400 mb-2">Canlı Log Terminali</h2>
+            <div id="terminal-ekran" class="h-64 bg-black p-4 rounded overflow-y-auto border border-green-900 text-sm"></div>
         </div>
     </div>
 
     <script>
         const socket = io();
-
-        function yeniBotKat() {
-            const username = document.getElementById('bot-username').value.trim();
-            const proxy = document.getElementById('bot-proxy').value.trim();
-            if (!username) return alert('Lütfen bot kullanıcı adı girin!');
-            socket.emit('yeniBotEkle', { username, proxy });
-            document.getElementById('bot-username').value = '';
-        }
-
-        function pvpBaslat() {
-            const hedef = document.getElementById('pvp-hedef').value.trim();
-            if (!hedef) return alert("Lütfen saldırılacak oyuncunun adını yazın!");
-            socket.emit('orduPvpBaslat', hedef);
-        }
-
-        function terminaliTemizle() {
-            document.getElementById('terminal-ekran').innerHTML = '';
-        }
-
-        function komutKontrol(e) {
-            if (e.key === 'Enter') komutGonder();
-        }
-
-        function komutGonder() {
-            const input = document.getElementById('terminal-input');
-            const komut = input.value.trim();
-            if (!komut) return;
-            socket.emit('terminalKomut', komut);
-            input.value = '';
-        }
-
-        socket.on('log', (mesaj) => {
-            const ekran = document.getElementById('terminal-ekran');
-            const satir = document.createElement('div');
-            satir.textContent = mesaj;
-            satir.className = "text-green-400 text-xs font-mono break-all";
-            ekran.appendChild(satir);
-            ekran.scrollTop = ekran.scrollHeight;
+        socket.on('log', (m) => {
+            const e = document.getElementById('terminal-ekran');
+            e.innerHTML += `<div class="mb-1">> ${m}</div>`;
+            e.scrollTop = e.scrollHeight;
         });
+        function botEkle() {
+            const username = document.getElementById('bot-username').value;
+            const proxy = document.getElementById('bot-proxy').value;
+            if(username) socket.emit('yeniBotEkle', { username, proxy });
+        }
+        function komutGonder() {
+            const komut = document.getElementById('global-komut').value;
+            if(komut) socket.emit('terminalKomut', komut);
+        }
     </script>
 </body>
-  </html>
+</html>
