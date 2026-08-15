@@ -1,0 +1,20 @@
+{
+  "name": "aesirmc-bot-panel",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5",
+    "mineflayer": "^4.20.0",
+    "mineflayer-pathfinder": "^2.4.4",
+    "mineflayer-pvp": "^3.0.0",
+    "minecraft-data": "^3.120.0",
+    "socks": "^2.8.3"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}
