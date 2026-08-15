@@ -13,6 +13,7 @@
     "mineflayer-pvp": "latest",
     "minecraft-data": "latest",
     "prismarine-viewer": "latest",
+    "canvas": "latest",
     "socks": "latest",
     "@google/generative-ai": "^0.15.0",
     "dotenv": "^16.4.5"
